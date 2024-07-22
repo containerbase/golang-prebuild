@@ -4,4 +4,6 @@ ENTRYPOINT [ "dumb-init", "--", "builder.sh" ]
 
 COPY bin /usr/local/bin
 
+ENV TOOL_NAME=golang
+
 RUN install-builder.sh

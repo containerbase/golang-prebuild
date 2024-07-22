@@ -4,15 +4,15 @@ set -e
 
 # shellcheck source=/dev/null
 . /usr/local/containerbase/util.sh
+# shellcheck source=/dev/null
+. /usr/local/containerbase/utils/v2/overrides.sh
 
 # trim leading v
 TOOL_VERSION=${1#v}
 
-NAME=golang
-ARCH=$(uname -p)
 farch=amd64
 
-if [[ "$ARCH" = "aarch64" ]]; then
+if [[ "${ARCHITECTURE}" = "aarch64" ]]; then
   farch=arm64
 fi
 
@@ -20,21 +20,9 @@ if [[ "${DEBUG}" == "true" ]]; then
   set -x
 fi
 
-SEMVER_REGEX="^(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))(\.(0|[1-9][0-9]*))$"
+check_semver "${TOOL_VERSION}" all
 
-function check_semver () {
-  if [[ ! "${1}" =~ ${SEMVER_REGEX} ]]; then
-    echo "Not a semver like version - aborting: ${1}" >&2
-    exit 1
-  fi
-  export MAJOR=${BASH_REMATCH[1]}
-  export MINOR=${BASH_REMATCH[3]}
-  export PATCH=${BASH_REMATCH[5]}
-}
-
-check_semver "${TOOL_VERSION}"
-
-echo "Building ${NAME} ${TOOL_VERSION} for ${ARCH}"
+echo "Building ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
 
 # fix version, only for go 1.20 and below
 fversion=${TOOL_VERSION}
@@ -43,7 +31,7 @@ if [[ ($MAJOR -lt 1 || ($MAJOR -eq 1 && $MINOR -lt 21)) && "${PATCH}" == "0" ]];
 fi
 
 
-expected_checksum=$(jq -r ".[] | select(.version == \"go${fversion}\") | .files[] | select(.os == \"linux\" and .arch == \"${farch}\") | .sha256" < /usr/local/golang/versions.json)
+expected_checksum=$(jq -r ".[] | select(.version == \"go${fversion}\") | .files[] | select(.os == \"linux\" and .arch == \"${farch}\") | .sha256" < /tmp/go-versions.json)
 file=$(get_from_url \
     "https://dl.google.com/go/go${fversion}.linux-${farch}.tar.gz" \
     "golang-v${TOOL_VERSION}-linux-${farch}.tar.xz" \
@@ -55,14 +43,15 @@ if [[ "$file" == "" ]]; then
   exit 1
 fi
 
-mkdir "/usr/local/${NAME}/${TOOL_VERSION}"
-tar -C "/usr/local/${NAME}/${TOOL_VERSION}" --strip 1 -xf "${file}"
+versioned_tool_path=$(create_versioned_tool_path)
+
+tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
 echo "------------------------"
-echo "Testing ${NAME} ${TOOL_VERSION} for ${ARCH}"
-"/usr/local/${NAME}/${TOOL_VERSION}/bin/go" version
-"/usr/local/${NAME}/${TOOL_VERSION}/bin/go" env
+echo "Testing ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
+"${versioned_tool_path}/bin/go" version
+"${versioned_tool_path}/bin/go" env
 
 echo "------------------------"
-echo "Compressing ${NAME} ${TOOL_VERSION} for ${ARCH}"
-tar -cJf "/cache/${NAME}-${TOOL_VERSION}-${ARCH}.tar.xz" -C "/usr/local/${NAME}" "${TOOL_VERSION}"
+echo "Compressing ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
+tar -cJf "/cache/${TOOL_NAME}-${TOOL_VERSION}-${ARCHITECTURE}.tar.xz" -C "$(find_tool_path)" "${TOOL_VERSION}"

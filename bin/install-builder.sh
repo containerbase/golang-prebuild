@@ -2,7 +2,17 @@
 
 set -e
 
-mkdir -p /usr/local/golang /cache
+# shellcheck source=/dev/null
+. /usr/local/containerbase/util.sh
+# shellcheck source=/dev/null
+. /usr/local/containerbase/utils/v2/overrides.sh
 
-curl -sSLf "https://go.dev/dl/?mode=json&include=all" -o /usr/local/golang/versions.json
+
+setup_directories
+
+create_tool_path > /dev/null
+
+mkdir /cache
+
+curl -sSLf "https://go.dev/dl/?mode=json&include=all" -o /tmp/go-versions.json
 
