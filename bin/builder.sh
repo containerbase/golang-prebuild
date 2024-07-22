@@ -8,7 +8,7 @@ set -e
 # trim leading v
 TOOL_VERSION=${1#v}
 
-NAME=node
+NAME=golang
 ARCH=$(uname -p)
 farch=amd64
 
@@ -55,7 +55,7 @@ if [[ "$file" == "" ]]; then
   exit 1
 fi
 
-mkdir -p "/usr/local/${NAME}/${TOOL_VERSION}"
+mkdir "/usr/local/${NAME}/${TOOL_VERSION}"
 tar -C "/usr/local/${NAME}/${TOOL_VERSION}" --strip 1 -xf "${file}"
 
 echo "------------------------"
@@ -65,4 +65,4 @@ echo "Testing ${NAME} ${TOOL_VERSION} for ${ARCH}"
 
 echo "------------------------"
 echo "Compressing ${NAME} ${TOOL_VERSION} for ${ARCH}"
-tar -cJf "/cache/${NAME}-${TOOL_VERSION}-${ARCH}.tar.xz" -C "/usr/local/${NAME}/${TOOL_VERSION}"
+tar -cJf "/cache/${NAME}-${TOOL_VERSION}-${ARCH}.tar.xz" -C "/usr/local/${NAME}" "${TOOL_VERSION}"
