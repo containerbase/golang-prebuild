@@ -1,0 +1,7 @@
+{
+  "image": "golang",
+  "depName": "golang",
+  "datasource": "docker",
+  "versioning": "docker",
+  "startVersion": "1.22.5"
+}

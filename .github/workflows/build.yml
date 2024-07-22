@@ -1,0 +1,57 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+  merge_group:
+
+  schedule:
+    - cron: '0 1 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  HUSKY: 0
+
+permissions:
+  contents: write
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - run: corepack enable
+      - run: pnpm install
+      - run: pnpm prettier
+
+  build:
+    needs:
+      - lint
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
+          - aarch64
+
+    env:
+      ARCH: ${{ matrix.arch }} # build target, name required by binary-builder
+
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: binary-builder
+        uses: containerbase/internal-tools@8742b8dcf85319ab1b06576afb3a5827e61cddde # v3.3.10
+        with:
+          command: binary-builder
+          dry-run: ${{github.ref_name != 'main'}}
+          token: ${{ secrets.GITHUB_TOKEN }}
