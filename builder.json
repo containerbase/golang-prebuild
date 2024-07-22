@@ -3,6 +3,6 @@
   "depName": "golang",
   "datasource": "docker",
   "versioning": "semver",
-  "startVersion": "1.22.0",
+  "startVersion": "1.17.0",
   "extractVersion": "^(?<version>\\d+\\.\\d+\\.\\d+)$"
 }
