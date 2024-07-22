@@ -45,7 +45,7 @@ fi
 
 versioned_tool_path=$(create_versioned_tool_path)
 
-tar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
+bsdtar -C "${versioned_tool_path}" --strip 1 -xf "${file}"
 
 echo "------------------------"
 echo "Testing ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
@@ -54,4 +54,4 @@ echo "Testing ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
 
 echo "------------------------"
 echo "Compressing ${TOOL_NAME} ${TOOL_VERSION} for ${ARCHITECTURE}"
-tar -cJf "/cache/${TOOL_NAME}-${TOOL_VERSION}-${ARCHITECTURE}.tar.xz" -C "$(find_tool_path)" "${TOOL_VERSION}"
+bsdtar -cJf "/cache/${TOOL_NAME}-${TOOL_VERSION}-${ARCHITECTURE}.tar.xz" -C "$(find_tool_path)" "${TOOL_VERSION}"
