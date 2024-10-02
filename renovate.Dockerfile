@@ -10,4 +10,4 @@ FROM scratch
 ENV GO_VERSION=1.21.13
 
 # renovate: datasource=docker depName=golang
-ENV GO_VERSION=1.22.7
+ENV GO_VERSION=1.22.8
